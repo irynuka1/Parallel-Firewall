@@ -52,7 +52,7 @@ Now you can work on the assignment and then test it.
 
 ## Working on the Assignment
 
-To work on the assignment follow the instructions in `README.md`.
+To work on the assignment follow the instructions in the root `README.md`.
 You need to enter the `src/` directory and update the source code files.
 
 While working on the assignment, run the checker to see if certain tests work, and they are graded.
@@ -97,7 +97,7 @@ Visit the fork on the [GitLab web interface](https://github.cs.pub.ro).
 Access the `CI/CD -> Jobs` entry in the left menu.
 You would get a view such as the one in the image below:
 
-![GitLab CI/CD Job](img/gitlab-jobs.png)
+![GitLab CI/CD Job](./img/gitlab-jobs.png)
 
 Click on the status of the job to see the run results.
 The results are the ones you get with the local checker: a checker output and a linter output.
@@ -114,7 +114,7 @@ Also, the grade from the submission will be made available on Moodle.
 
 Results in Moodle are presented similar to the image below:
 
-![Moodle Result](img/moodle-result.png)
+![Moodle Result](./img/moodle-result.png)
 
 ### Direct Moodle Submission
 

@@ -3,7 +3,7 @@ UTILS_PATH ?= ../utils
 CPPFLAGS := -I$(UTILS_PATH)
 CFLAGS := -Wall -Wextra
 
-CFLAGS += -ggdb -O0
+CFLAGS += -O2
 LDLIBS := -lpthread
 
 SRCS:= ring_buffer.c producer.c consumer.c packet.c $(UTILS_PATH)/log/log.c

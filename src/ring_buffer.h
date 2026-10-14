@@ -17,6 +17,8 @@ typedef struct so_ring_buffer_t {
 	size_t cap;
 
 	int is_stopped;
+	int full_waiters;
+	int empty_waiters;
 	pthread_mutex_t mutex;
 	pthread_cond_t not_full;
 	pthread_cond_t not_empty;

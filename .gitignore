@@ -1,0 +1,9 @@
+# Build artifacts
+*.o
+src/firewall
+src/serial
+src.zip
+
+# Test artifacts
+tests/out/
+tests/__pycache__/

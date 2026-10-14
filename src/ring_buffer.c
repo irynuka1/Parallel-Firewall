@@ -41,6 +41,8 @@ int ring_buffer_init(so_ring_buffer_t *ring, size_t cap)
 	(*ring).read_pos = 0;
 	(*ring).write_pos = 0;
 	(*ring).is_stopped = 0;
+	(*ring).full_waiters = 0;
+	(*ring).empty_waiters = 0;
 
 	// Checking the initializations
 	if (pthread_mutex_init(&(*ring).mutex, NULL) != 0) {
@@ -65,8 +67,11 @@ ssize_t ring_buffer_enqueue(so_ring_buffer_t *ring, void *data, size_t size)
 	pthread_mutex_lock(&(*ring).mutex);
 
 	// Waiting for the ring buffer to free up space
-	while ((*ring).len + size > (*ring).cap && !(*ring).is_stopped)
+	while ((*ring).len + size > (*ring).cap && !(*ring).is_stopped) {
+		(*ring).full_waiters++;
 		pthread_cond_wait(&(*ring).not_full, &(*ring).mutex);
+		(*ring).full_waiters--;
+	}
 
 	if ((*ring).is_stopped) {
 		pthread_mutex_unlock(&(*ring).mutex);
@@ -79,7 +84,9 @@ ssize_t ring_buffer_enqueue(so_ring_buffer_t *ring, void *data, size_t size)
 	(*ring).write_pos = ((*ring).write_pos + size) % (*ring).cap;
 	(*ring).len += size;
 
-	pthread_cond_signal(&(*ring).not_empty);
+	// Only signal when someone is actually waiting
+	if ((*ring).empty_waiters > 0)
+		pthread_cond_signal(&(*ring).not_empty);
 	pthread_mutex_unlock(&(*ring).mutex);
 
 	return size;
@@ -93,8 +100,11 @@ ssize_t ring_buffer_dequeue(so_ring_buffer_t *ring, void *data, size_t size)
 	pthread_mutex_lock(&(*ring).mutex);
 
 	// Waiting for the ring buffer to have enough data
-	while ((*ring).len < size && !(*ring).is_stopped)
+	while ((*ring).len < size && !(*ring).is_stopped) {
+		(*ring).empty_waiters++;
 		pthread_cond_wait(&(*ring).not_empty, &(*ring).mutex);
+		(*ring).empty_waiters--;
+	}
 
 	if ((*ring).len < size && (*ring).is_stopped) {
 		pthread_mutex_unlock(&(*ring).mutex);
@@ -107,7 +117,8 @@ ssize_t ring_buffer_dequeue(so_ring_buffer_t *ring, void *data, size_t size)
 	(*ring).read_pos = ((*ring).read_pos + size) % (*ring).cap;
 	(*ring).len -= size;
 
-	pthread_cond_signal(&(*ring).not_full);
+	if ((*ring).full_waiters > 0)
+		pthread_cond_signal(&(*ring).not_full);
 	pthread_mutex_unlock(&(*ring).mutex);
 
 	return size;
